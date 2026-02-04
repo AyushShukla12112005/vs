@@ -57,11 +57,15 @@ export default function Settings() {
 
     setLoading(true);
     try {
-      const { data } = await api.put('/auth/profile', { name: trimmedName });
-      updateUser(data);
+      console.log('Updating profile with name:', trimmedName);
+      const { data } = await api.patch('/auth/profile', { name: trimmedName });
+      console.log('Profile update response:', data);
+      updateUser(data.user);
+      setProfileData({ ...profileData, name: data.user.name });
       addToast('Profile updated successfully', { type: 'success' });
     } catch (error) {
       console.error('Failed to update profile:', error);
+      console.error('Error response:', error.response?.data);
       addToast(error.response?.data?.message || 'Failed to update profile', { type: 'error' });
     } finally {
       setLoading(false);

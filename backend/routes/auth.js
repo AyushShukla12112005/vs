@@ -145,7 +145,7 @@ router.get('/reset-tokens', protect, async (req, res) => {
 });
 
 // Update Profile
-router.put('/profile', protect, async (req, res) => {
+router.patch('/profile', protect, async (req, res) => {
   try {
     const { name } = req.body;
     
@@ -159,14 +159,14 @@ router.put('/profile', protect, async (req, res) => {
       { new: true }
     ).select('-password');
 
-    res.json(user.toJSON());
+    res.json({ user: user.toJSON() });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
 // Change Password
-router.put('/change-password', protect, async (req, res) => {
+router.patch('/change-password', protect, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     
