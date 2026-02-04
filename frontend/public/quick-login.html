@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Login - Bug Tracker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        .logo {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .credentials {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: left;
+        }
+        .credentials h3 {
+            color: #495057;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .cred-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .cred-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .cred-value {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .cred-value:hover {
+            background: #dee2e6;
+            transform: scale(1.02);
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #856404;
+            font-size: 14px;
+        }
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .copy-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🐛</div>
+        <h1>Bug Tracker</h1>
+        <p class="subtitle">Quick Login Access</p>
+        
+        <div class="credentials">
+            <h3>🔑 Test Account Credentials</h3>
+            <div class="cred-item">
+                <span class="cred-label">Email:</span>
+                <span class="cred-value" onclick="copyToClipboard('test@example.com')" title="Click to copy">
+                    test@example.com
+                    <button class="copy-btn" onclick="copyToClipboard('test@example.com')">Copy</button>
+                </span>
+            </div>
+            <div class="cred-item">
+                <span class="cred-label">Password:</span>
+                <span class="cred-value" onclick="copyToClipboard('password123')" title="Click to copy">
+                    password123
+                    <button class="copy-btn" onclick="copyToClipboard('password123')">Copy</button>
+                </span>
+            </div>
+        </div>
+        
+        <div class="note">
+            <strong>💡 Note:</strong> This is a test account created automatically for development. 
+            The database resets when the server restarts, but this account will be recreated automatically.
+        </div>
+        
+        <div>
+            <a href="/" class="btn btn-primary">🚀 Go to Login Page</a>
+            <a href="/login-test.html" class="btn btn-secondary">🧪 Test API</a>
+        </div>
+        
+        <div style="margin-top: 30px; font-size: 14px; color: #666;">
+            <p><strong>Quick Access Links:</strong></p>
+            <p>
+                <a href="/status.html" style="color: #667eea;">System Status</a> | 
+                <a href="/debug.html" style="color: #667eea;">Debug Tools</a> | 
+                <a href="/test.html" style="color: #667eea;">Connection Test</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show a temporary success message
+                const originalText = event.target.textContent;
+                event.target.textContent = 'Copied!';
+                event.target.style.background = '#28a745';
+                event.target.style.color = 'white';
+                
+                setTimeout(() => {
+                    event.target.textContent = originalText;
+                    event.target.style.background = '#e9ecef';
+                    event.target.style.color = '#495057';
+                }, 1000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+        
+        // Auto-fill login form if we're redirected back
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('autofill') === 'true') {
+                // If the main app is loaded, try to fill the login form
+                setTimeout(() => {
+                    const emailInput = document.querySelector('input[type="email"]');
+                    const passwordInput = document.querySelector('input[type="password"]');
+                    
+                    if (emailInput && passwordInput) {
+                        emailInput.value = 'test@example.com';
+                        passwordInput.value = 'password123';
+                        emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

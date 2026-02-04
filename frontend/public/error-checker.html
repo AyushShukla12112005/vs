@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Checker - Bug Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .test-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        .test-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        .test-card .icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .test-card .title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .test-card .status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .test-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        .test-button:hover {
+            background: #5568d3;
+        }
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .console-output .error {
+            color: #f48771;
+        }
+        .console-output .success {
+            color: #89d185;
+        }
+        .console-output .info {
+            color: #6cb6ff;
+        }
+        .summary {
+            background: #e7f3ff;
+            border: 2px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .summary h3 {
+            margin-top: 0;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Error Checker</h1>
+        <p class="subtitle">Comprehensive error detection for all pages</p>
+
+        <div style="margin-bottom: 20px;">
+            <button class="test-button" onclick="runAllTests()" style="background: #28a745; max-width: 200px;">
+                ▶️ Run All Tests
+            </button>
+            <button class="test-button" onclick="clearConsole()" style="background: #6c757d; max-width: 200px;">
+                🗑️ Clear Console
+            </button>
+        </div>
+
+        <div class="test-grid" id="testGrid">
+            <!-- Test cards will be inserted here -->
+        </div>
+
+        <div class="summary" id="summary" style="display: none;">
+            <h3>📊 Test Summary</h3>
+            <div id="summaryContent"></div>
+        </div>
+
+        <div class="console-output" id="console">
+            <div class="info">Console ready. Click "Run All Tests" to start...</div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <button class="test-button" onclick="window.location.href='/'" style="max-width: 300px;">
+                🏠 Go to Main App
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const pages = [
+            { name: 'Dashboard', path: '/', icon: '🏠' },
+            { name: 'All Tickets', path: '/tickets', icon: '🎫' },
+            { name: 'Kanban Board', path: '/kanban', icon: '📋' },
+            { name: 'My Tasks', path: '/my-tasks', icon: '👤' },
+            { name: 'Settings', path: '/settings', icon: '⚙️' },
+            { name: 'Login', path: '/login', icon: '🔐' },
+            { name: 'Register', path: '/register', icon: '📝' }
+        ];
+
+        const testResults = {};
+
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${timestamp}] ${message}`;
+            console.appendChild(div);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '<div class="info">Console cleared.</div>';
+        }
+
+        function updateCard(pageName, status) {
+            const card = document.getElementById(`card-${pageName.replace(/\s+/g, '-')}`);
+            if (card) {
+                const statusEl = card.querySelector('.status');
+                statusEl.className = `status ${status}`;
+                statusEl.textContent = status === 'success' ? '✓ OK' : status === 'error' ? '✗ Error' : '⏳ Testing...';
+            }
+        }
+
+        function createTestCards() {
+            const grid = document.getElementById('testGrid');
+            grid.innerHTML = '';
+            
+            pages.forEach(page => {
+                const card = document.createElement('div');
+                card.className = 'test-card';
+                card.id = `card-${page.name.replace(/\s+/g, '-')}`;
+                card.innerHTML = `
+                    <div class="icon">${page.icon}</div>
+                    <div class="title">${page.name}</div>
+                    <div class="status pending">⏳ Pending</div>
+                    <button class="test-button" onclick="testPage('${page.name}', '${page.path}')">
+                        Test Page
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        async function testPage(name, path) {
+            log(`Testing ${name} (${path})...`, 'info');
+            updateCard(name, 'pending');
+
+            try {
+                // Check if page requires authentication
+                const requiresAuth = !['Login', 'Register'].includes(name);
+                const token = localStorage.getItem('token');
+
+                if (requiresAuth && !token) {
+                    log(`${name}: Requires authentication`, 'error');
+                    testResults[name] = { success: false, error: 'Not logged in' };
+                    updateCard(name, 'error');
+                    return;
+                }
+
+                // Try to fetch the page
+                const response = await fetch(path, {
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                });
+
+                if (response.ok) {
+                    log(`${name}: ✓ Page loads successfully`, 'success');
+                    testResults[name] = { success: true };
+                    updateCard(name, 'success');
+                } else {
+                    log(`${name}: ✗ HTTP ${response.status}`, 'error');
+                    testResults[name] = { success: false, error: `HTTP ${response.status}` };
+                    updateCard(name, 'error');
+                }
+            } catch (error) {
+                log(`${name}: ✗ ${error.message}`, 'error');
+                testResults[name] = { success: false, error: error.message };
+                updateCard(name, 'error');
+            }
+        }
+
+        async function runAllTests() {
+            log('Starting comprehensive test suite...', 'info');
+            log('═══════════════════════════════════════', 'info');
+            
+            for (const page of pages) {
+                await testPage(page.name, page.path);
+                await new Promise(resolve => setTimeout(resolve, 500)); // Delay between tests
+            }
+
+            log('═══════════════════════════════════════', 'info');
+            log('All tests completed!', 'success');
+            
+            showSummary();
+        }
+
+        function showSummary() {
+            const summary = document.getElementById('summary');
+            const content = document.getElementById('summaryContent');
+            
+            const total = Object.keys(testResults).length;
+            const passed = Object.values(testResults).filter(r => r.success).length;
+            const failed = total - passed;
+            
+            content.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 32px; font-weight: bold; color: #004085;">${total}</div>
+                        <div style="font-size: 14px; color: #6c757d;">Total Tests</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 32px; font-weight: bold; color: #155724;">${passed}</div>
+                        <div style="font-size: 14px; color: #6c757d;">Passed</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 32px; font-weight: bold; color: #721c24;">${failed}</div>
+                        <div style="font-size: 14px; color: #6c757d;">Failed</div>
+                    </div>
+                </div>
+                ${failed > 0 ? `
+                    <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 4px;">
+                        <strong>⚠️ Issues Found:</strong><br>
+                        ${Object.entries(testResults)
+                            .filter(([_, r]) => !r.success)
+                            .map(([name, r]) => `• ${name}: ${r.error}`)
+                            .join('<br>')}
+                    </div>
+                ` : `
+                    <div style="margin-top: 15px; padding: 10px; background: #d4edda; border-radius: 4px; color: #155724;">
+                        <strong>✅ All tests passed!</strong> No errors found.
+                    </div>
+                `}
+            `;
+            
+            summary.style.display = 'block';
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            createTestCards();
+            
+            // Check login status
+            const token = localStorage.getItem('token');
+            if (!token) {
+                log('⚠️ Not logged in. Some tests may fail.', 'error');
+                log('Login at /login to test protected pages.', 'info');
+            } else {
+                log('✓ Logged in. Ready to test all pages.', 'success');
+            }
+            
+            log('Click "Run All Tests" or test individual pages.', 'info');
+        });
+    </script>
+</body>
+</html>

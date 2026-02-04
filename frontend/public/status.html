@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Tracker - Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .status-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+        .status-item.error {
+            border-left-color: #f44336;
+        }
+        .status-item.warning {
+            border-left-color: #ff9800;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .console {
+            background: rgba(0, 0, 0, 0.5);
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo h1 {
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>🐛 Bug Tracker</h1>
+            <p>System Status & Diagnostics</p>
+        </div>
+        
+        <div id="status-container">
+            <div class="status-item">
+                <strong>Frontend Server:</strong> ✅ Running on http://localhost:3011
+            </div>
+            <div class="status-item" id="backend-status">
+                <strong>Backend Server:</strong> <span id="backend-text">Testing...</span>
+            </div>
+            <div class="status-item" id="react-status">
+                <strong>React Application:</strong> <span id="react-text">Testing...</span>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="testAll()">🔄 Run All Tests</button>
+            <button onclick="goToApp()">🚀 Launch App</button>
+            <button onclick="clearCache()">🗑️ Clear Cache</button>
+            <button onclick="showDebugInfo()">🔍 Debug Info</button>
+        </div>
+        
+        <div class="console" id="console"></div>
+    </div>
+
+    <script>
+        const console_div = document.getElementById('console');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#00ff00';
+            console_div.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            console_div.scrollTop = console_div.scrollHeight;
+        }
+        
+        async function testBackend() {
+            const statusEl = document.getElementById('backend-status');
+            const textEl = document.getElementById('backend-text');
+            
+            try {
+                const response = await fetch('/api/health');
+                if (response.ok) {
+                    statusEl.className = 'status-item';
+                    textEl.textContent = '✅ Connected';
+                    log('Backend server is responding correctly', 'success');
+                    return true;
+                } else {
+                    statusEl.className = 'status-item error';
+                    textEl.textContent = '❌ Server error: ' + response.status;
+                    log('Backend server error: ' + response.status, 'error');
+                    return false;
+                }
+            } catch (error) {
+                statusEl.className = 'status-item error';
+                textEl.textContent = '❌ Connection failed';
+                log('Backend connection failed: ' + error.message, 'error');
+                return false;
+            }
+        }
+        
+        async function testReact() {
+            const statusEl = document.getElementById('react-status');
+            const textEl = document.getElementById('react-text');
+            
+            try {
+                // Check if React is loaded
+                const response = await fetch('/');
+                const html = await response.text();
+                
+                if (html.includes('<div id="root">')) {
+                    statusEl.className = 'status-item';
+                    textEl.textContent = '✅ HTML template OK';
+                    log('React HTML template is correct', 'success');
+                    
+                    // Try to detect if React actually rendered
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.src = '/';
+                    document.body.appendChild(iframe);
+                    
+                    setTimeout(() => {
+                        try {
+                            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                            const root = iframeDoc.getElementById('root');
+                            
+                            if (root && root.children.length > 0) {
+                                statusEl.className = 'status-item';
+                                textEl.textContent = '✅ React rendered successfully';
+                                log('React application is rendering correctly', 'success');
+                            } else {
+                                statusEl.className = 'status-item warning';
+                                textEl.textContent = '⚠️ React not rendering';
+                                log('React HTML loaded but not rendering content', 'error');
+                            }
+                        } catch (e) {
+                            statusEl.className = 'status-item warning';
+                            textEl.textContent = '⚠️ Cannot check React status';
+                            log('Cannot access React iframe: ' + e.message, 'error');
+                        }
+                        document.body.removeChild(iframe);
+                    }, 2000);
+                    
+                    return true;
+                } else {
+                    statusEl.className = 'status-item error';
+                    textEl.textContent = '❌ HTML template error';
+                    log('HTML template is missing root div', 'error');
+                    return false;
+                }
+            } catch (error) {
+                statusEl.className = 'status-item error';
+                textEl.textContent = '❌ Failed to load';
+                log('Failed to test React: ' + error.message, 'error');
+                return false;
+            }
+        }
+        
+        async function testAll() {
+            log('Starting comprehensive system test...', 'info');
+            console_div.innerHTML = '';
+            
+            const backendOk = await testBackend();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const reactOk = await testReact();
+            
+            if (backendOk && reactOk) {
+                log('All systems operational! 🎉', 'success');
+            } else {
+                log('Some issues detected. Check the status above.', 'error');
+            }
+        }
+        
+        function goToApp() {
+            log('Redirecting to main application...', 'info');
+            window.location.href = '/';
+        }
+        
+        function clearCache() {
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                });
+            }
+            localStorage.clear();
+            sessionStorage.clear();
+            log('Browser cache cleared', 'success');
+        }
+        
+        function showDebugInfo() {
+            log('=== DEBUG INFORMATION ===', 'info');
+            log('User Agent: ' + navigator.userAgent, 'info');
+            log('URL: ' + window.location.href, 'info');
+            log('Local Storage: ' + Object.keys(localStorage).length + ' items', 'info');
+            log('Session Storage: ' + Object.keys(sessionStorage).length + ' items', 'info');
+            log('Screen: ' + screen.width + 'x' + screen.height, 'info');
+            log('Viewport: ' + window.innerWidth + 'x' + window.innerHeight, 'info');
+        }
+        
+        // Auto-run tests on page load
+        setTimeout(testAll, 1000);
+    </script>
+</body>
+</html>

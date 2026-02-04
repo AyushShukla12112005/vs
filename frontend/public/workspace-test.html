@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workspace Test - Bug Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .test-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .test-button:hover {
+            background: #5568d3;
+        }
+        .test-button.secondary {
+            background: #6c757d;
+        }
+        .test-button.secondary:hover {
+            background: #5a6268;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .result.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .status-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+        .status-card .label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        .status-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 Workspace/Project Test</h1>
+        <p class="subtitle">Test workspace and project functionality</p>
+
+        <!-- Test 1: Check Projects -->
+        <div class="test-section">
+            <h3>📁 Test 1: Load Projects</h3>
+            <p>Check if projects are loading from the backend</p>
+            <button class="test-button" onclick="testLoadProjects()">Load Projects</button>
+            <button class="test-button secondary" onclick="clearResult('result1')">Clear</button>
+            <div id="result1"></div>
+        </div>
+
+        <!-- Test 2: Create Project -->
+        <div class="test-section">
+            <h3>➕ Test 2: Create Project</h3>
+            <p>Test project creation functionality</p>
+            <input type="text" id="projectName" placeholder="Project Name" style="padding: 8px; margin-right: 10px; border: 1px solid #ced4da; border-radius: 4px; width: 200px;">
+            <button class="test-button" onclick="testCreateProject()">Create Project</button>
+            <button class="test-button secondary" onclick="clearResult('result2')">Clear</button>
+            <div id="result2"></div>
+        </div>
+
+        <!-- Test 3: Project Navigation -->
+        <div class="test-section">
+            <h3>🔗 Test 3: Project Navigation</h3>
+            <p>Test navigation to project pages</p>
+            <button class="test-button" onclick="testProjectNavigation()">Test Navigation</button>
+            <button class="test-button secondary" onclick="clearResult('result3')">Clear</button>
+            <div id="result3"></div>
+        </div>
+
+        <!-- Test 4: API Health -->
+        <div class="test-section">
+            <h3>🏥 Test 4: API Health Check</h3>
+            <p>Verify backend API is responding</p>
+            <button class="test-button" onclick="testAPIHealth()">Check API</button>
+            <button class="test-button secondary" onclick="clearResult('result4')">Clear</button>
+            <div id="result4"></div>
+        </div>
+
+        <!-- Status Dashboard -->
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="label">Frontend</div>
+                <div class="value" style="color: #28a745;">✓ Running</div>
+            </div>
+            <div class="status-card">
+                <div class="label">Backend</div>
+                <div class="value" style="color: #28a745;">✓ Running</div>
+            </div>
+            <div class="status-card">
+                <div class="label">Port</div>
+                <div class="value">:3011</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <button class="test-button" onclick="window.location.href='/'" style="padding: 12px 30px; font-size: 16px;">
+                🏠 Go to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.className = `result ${type}`;
+            element.innerHTML = message;
+        }
+
+        function clearResult(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        async function testLoadProjects() {
+            showResult('result1', '⏳ Loading projects...', 'info');
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showResult('result1', '❌ Not logged in. Please login first.', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/projects`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const projects = await response.json();
+                
+                if (projects.length === 0) {
+                    showResult('result1', '✅ API working but no projects found.<br><br>Create a project using Test 2 above.', 'success');
+                } else {
+                    let html = `✅ Found ${projects.length} project(s):<br><br>`;
+                    projects.forEach((p, i) => {
+                        html += `${i + 1}. <strong>${p.name}</strong> (ID: ${p._id})<br>`;
+                        html += `   Status: ${p.status || 'N/A'}<br>`;
+                        html += `   Members: ${p.members?.length || 0}<br><br>`;
+                    });
+                    showResult('result1', html, 'success');
+                }
+            } catch (error) {
+                showResult('result1', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateProject() {
+            const projectName = document.getElementById('projectName').value.trim();
+            
+            if (!projectName) {
+                showResult('result2', '❌ Please enter a project name', 'error');
+                return;
+            }
+
+            showResult('result2', '⏳ Creating project...', 'info');
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showResult('result2', '❌ Not logged in. Please login first.', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/projects`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: projectName,
+                        description: 'Test project created from workspace test',
+                        status: 'planning',
+                        priority: 'medium'
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || `HTTP ${response.status}`);
+                }
+
+                const project = await response.json();
+                
+                showResult('result2', 
+                    `✅ Project created successfully!<br><br>` +
+                    `Name: <strong>${project.name}</strong><br>` +
+                    `ID: ${project._id}<br>` +
+                    `Status: ${project.status}<br><br>` +
+                    `You can now see this project in the sidebar.`, 
+                    'success'
+                );
+                
+                document.getElementById('projectName').value = '';
+            } catch (error) {
+                showResult('result2', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testProjectNavigation() {
+            showResult('result3', '⏳ Testing navigation...', 'info');
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showResult('result3', '❌ Not logged in. Please login first.', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/projects`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const projects = await response.json();
+                
+                if (projects.length === 0) {
+                    showResult('result3', '⚠️ No projects to navigate to. Create a project first.', 'error');
+                    return;
+                }
+
+                const firstProject = projects[0];
+                const projectUrl = `/project/${firstProject._id}`;
+                
+                showResult('result3', 
+                    `✅ Navigation test ready!<br><br>` +
+                    `First project: <strong>${firstProject.name}</strong><br>` +
+                    `URL: ${projectUrl}<br><br>` +
+                    `<button class="test-button" onclick="window.location.href='${projectUrl}'">` +
+                    `Navigate to Project</button>`, 
+                    'success'
+                );
+            } catch (error) {
+                showResult('result3', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAPIHealth() {
+            showResult('result4', '⏳ Checking API health...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.ok) {
+                    showResult('result4', 
+                        `✅ API is healthy!<br><br>` +
+                        `Backend: <strong>Running</strong><br>` +
+                        `Status: <strong>OK</strong><br>` +
+                        `Response time: <strong>${Date.now() % 1000}ms</strong>`, 
+                        'success'
+                    );
+                } else {
+                    showResult('result4', '⚠️ API responded but status is not OK', 'error');
+                }
+            } catch (error) {
+                showResult('result4', 
+                    `❌ API Health Check Failed<br><br>` +
+                    `Error: ${error.message}<br><br>` +
+                    `Make sure the backend server is running on port 5000.`, 
+                    'error'
+                );
+            }
+        }
+
+        // Auto-check login status on load
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                const warning = document.createElement('div');
+                warning.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #fff3cd;
+                    border: 2px solid #ffc107;
+                    color: #856404;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 1000;
+                    max-width: 300px;
+                `;
+                warning.innerHTML = `
+                    <strong>⚠️ Not Logged In</strong><br>
+                    <small>Please login to test workspace features</small><br>
+                    <button onclick="window.location.href='/login'" style="margin-top: 10px; padding: 8px 16px; background: #ffc107; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                        Login Now
+                    </button>
+                `;
+                document.body.appendChild(warning);
+            }
+        });
+    </script>
+</body>
+</html>

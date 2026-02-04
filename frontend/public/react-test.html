@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Test - Bug Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .test-result {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+        .test-result.error {
+            border-left-color: #f44336;
+        }
+        .test-result.warning {
+            border-left-color: #ff9800;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .console {
+            background: rgba(0, 0, 0, 0.5);
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 Bug Tracker - React Diagnostics</h1>
+        <p>This page tests React functionality step by step</p>
+        
+        <div id="test-results"></div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="runAllTests()">🔄 Run All Tests</button>
+            <button onclick="testMainApp()">🚀 Test Main App</button>
+            <button onclick="clearResults()">🗑️ Clear Results</button>
+        </div>
+        
+        <div class="console" id="console"></div>
+    </div>
+
+    <script type="module">
+        const resultsDiv = document.getElementById('test-results');
+        const consoleDiv = document.getElementById('console');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#00ff00';
+            consoleDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        function addResult(title, message, type = 'success') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>${title}:</strong> ${message}`;
+            resultsDiv.appendChild(div);
+        }
+        
+        function clearResults() {
+            resultsDiv.innerHTML = '';
+            consoleDiv.innerHTML = '';
+        }
+        
+        async function testReactImport() {
+            try {
+                log('Testing React import...');
+                const React = await import('react');
+                const ReactDOM = await import('react-dom/client');
+                
+                if (React && ReactDOM) {
+                    addResult('React Import', '✅ React and ReactDOM imported successfully', 'success');
+                    log('React version: ' + React.version, 'success');
+                    return true;
+                } else {
+                    addResult('React Import', '❌ React or ReactDOM is undefined', 'error');
+                    return false;
+                }
+            } catch (error) {
+                addResult('React Import', `❌ Failed to import React: ${error.message}`, 'error');
+                log('React import error: ' + error.message, 'error');
+                return false;
+            }
+        }
+        
+        async function testReactRender() {
+            try {
+                log('Testing React rendering...');
+                const React = await import('react');
+                const ReactDOM = await import('react-dom/client');
+                
+                // Create a test component
+                const TestComponent = React.createElement('div', {
+                    style: { padding: '20px', background: '#f0f0f0', color: '#333', borderRadius: '8px' }
+                }, 'React rendering test successful! 🎉');
+                
+                // Create a test container
+                const testContainer = document.createElement('div');
+                testContainer.id = 'react-test-container';
+                document.body.appendChild(testContainer);
+                
+                // Try to render
+                const root = ReactDOM.createRoot(testContainer);
+                root.render(TestComponent);
+                
+                // Check if it rendered
+                setTimeout(() => {
+                    if (testContainer.innerHTML.includes('React rendering test successful')) {
+                        addResult('React Rendering', '✅ React can render components successfully', 'success');
+                        log('React rendering test passed', 'success');
+                    } else {
+                        addResult('React Rendering', '❌ React rendering failed - no content found', 'error');
+                        log('React rendering test failed - no content', 'error');
+                    }
+                }, 100);
+                
+                return true;
+            } catch (error) {
+                addResult('React Rendering', `❌ React rendering failed: ${error.message}`, 'error');
+                log('React rendering error: ' + error.message, 'error');
+                return false;
+            }
+        }
+        
+        async function testRouterImport() {
+            try {
+                log('Testing React Router import...');
+                const { BrowserRouter } = await import('react-router-dom');
+                
+                if (BrowserRouter) {
+                    addResult('React Router', '✅ React Router imported successfully', 'success');
+                    return true;
+                } else {
+                    addResult('React Router', '❌ BrowserRouter is undefined', 'error');
+                    return false;
+                }
+            } catch (error) {
+                addResult('React Router', `❌ Failed to import React Router: ${error.message}`, 'error');
+                log('React Router import error: ' + error.message, 'error');
+                return false;
+            }
+        }
+        
+        async function testContextImports() {
+            try {
+                log('Testing context imports...');
+                const { AuthProvider } = await import('/src/context/AuthContext.jsx');
+                const { ToastProvider } = await import('/src/context/ToastContext.jsx');
+                const { ThemeProvider } = await import('/src/context/ThemeContext.jsx');
+                
+                if (AuthProvider && ToastProvider && ThemeProvider) {
+                    addResult('Context Providers', '✅ All context providers imported successfully', 'success');
+                    return true;
+                } else {
+                    addResult('Context Providers', '❌ Some context providers are undefined', 'error');
+                    return false;
+                }
+            } catch (error) {
+                addResult('Context Providers', `❌ Failed to import contexts: ${error.message}`, 'error');
+                log('Context import error: ' + error.message, 'error');
+                return false;
+            }
+        }
+        
+        async function testAppImport() {
+            try {
+                log('Testing App component import...');
+                const { default: App } = await import('/src/App.jsx');
+                
+                if (App) {
+                    addResult('App Component', '✅ App component imported successfully', 'success');
+                    return true;
+                } else {
+                    addResult('App Component', '❌ App component is undefined', 'error');
+                    return false;
+                }
+            } catch (error) {
+                addResult('App Component', `❌ Failed to import App: ${error.message}`, 'error');
+                log('App import error: ' + error.message, 'error');
+                return false;
+            }
+        }
+        
+        async function testCSSImport() {
+            try {
+                log('Testing CSS import...');
+                await import('/src/index.css');
+                addResult('CSS Import', '✅ CSS imported successfully', 'success');
+                return true;
+            } catch (error) {
+                addResult('CSS Import', `❌ Failed to import CSS: ${error.message}`, 'error');
+                log('CSS import error: ' + error.message, 'error');
+                return false;
+            }
+        }
+        
+        async function runAllTests() {
+            clearResults();
+            log('Starting comprehensive React tests...', 'info');
+            
+            const tests = [
+                { name: 'React Import', fn: testReactImport },
+                { name: 'React Rendering', fn: testReactRender },
+                { name: 'React Router', fn: testRouterImport },
+                { name: 'Context Providers', fn: testContextImports },
+                { name: 'App Component', fn: testAppImport },
+                { name: 'CSS Import', fn: testCSSImport }
+            ];
+            
+            let passedTests = 0;
+            
+            for (const test of tests) {
+                try {
+                    const result = await test.fn();
+                    if (result) passedTests++;
+                } catch (error) {
+                    log(`Test ${test.name} threw an error: ${error.message}`, 'error');
+                }
+                
+                // Small delay between tests
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+            
+            log(`Tests completed: ${passedTests}/${tests.length} passed`, passedTests === tests.length ? 'success' : 'error');
+            
+            if (passedTests === tests.length) {
+                addResult('Overall Result', '🎉 All tests passed! The issue might be with component logic or data loading.', 'success');
+            } else {
+                addResult('Overall Result', `⚠️ ${tests.length - passedTests} tests failed. Check the specific errors above.`, 'error');
+            }
+        }
+        
+        async function testMainApp() {
+            try {
+                log('Testing main application load...', 'info');
+                window.location.href = '/';
+            } catch (error) {
+                log('Failed to navigate to main app: ' + error.message, 'error');
+            }
+        }
+        
+        // Make functions global
+        window.runAllTests = runAllTests;
+        window.testMainApp = testMainApp;
+        window.clearResults = clearResults;
+        
+        // Auto-run tests on page load
+        setTimeout(runAllTests, 1000);
+    </script>
+</body>
+</html>

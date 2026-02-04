@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Bug Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #f5c6cb;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #c3e6cb;
+            margin: 10px 0;
+        }
+        #console-output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-panel">
+        <h1>Bug Tracker - Debug Panel</h1>
+        <p>This page helps diagnose issues with the React application.</p>
+        
+        <div id="status"></div>
+        
+        <button onclick="testReactApp()">Test React App</button>
+        <button onclick="clearConsole()">Clear Console</button>
+        <button onclick="goToMainApp()">Go to Main App</button>
+        
+        <h3>Console Output:</h3>
+        <div id="console-output"></div>
+    </div>
+
+    <script>
+        const consoleOutput = document.getElementById('console-output');
+        const statusDiv = document.getElementById('status');
+        
+        // Capture console messages
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsole(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            consoleOutput.textContent += `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole('log', args.join(' '));
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole('error', args.join(' '));
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole('warn', args.join(' '));
+        };
+        
+        // Capture unhandled errors
+        window.addEventListener('error', function(e) {
+            addToConsole('error', `Unhandled error: ${e.message} at ${e.filename}:${e.lineno}`);
+            statusDiv.innerHTML = '<div class="error">JavaScript Error Detected! Check console output above.</div>';
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            addToConsole('error', `Unhandled promise rejection: ${e.reason}`);
+            statusDiv.innerHTML = '<div class="error">Promise Rejection Detected! Check console output above.</div>';
+        });
+        
+        function testReactApp() {
+            statusDiv.innerHTML = '<div>Testing React app...</div>';
+            
+            // Try to load the main app
+            fetch('/')
+                .then(response => response.text())
+                .then(html => {
+                    if (html.includes('<div id="root">')) {
+                        statusDiv.innerHTML = '<div class="success">✅ HTML template is correct</div>';
+                        
+                        // Try to load the React bundle
+                        const script = document.createElement('script');
+                        script.type = 'module';
+                        script.src = '/src/main.jsx';
+                        script.onload = () => {
+                            statusDiv.innerHTML += '<div class="success">✅ React bundle loaded</div>';
+                        };
+                        script.onerror = (e) => {
+                            statusDiv.innerHTML += '<div class="error">❌ Failed to load React bundle</div>';
+                            addToConsole('error', 'Failed to load React bundle: ' + e.message);
+                        };
+                        document.head.appendChild(script);
+                    } else {
+                        statusDiv.innerHTML = '<div class="error">❌ HTML template is missing root div</div>';
+                    }
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = '<div class="error">❌ Failed to fetch main page: ' + error.message + '</div>';
+                });
+        }
+        
+        function clearConsole() {
+            consoleOutput.textContent = '';
+        }
+        
+        function goToMainApp() {
+            window.location.href = '/';
+        }
+        
+        // Auto-test on page load
+        setTimeout(testReactApp, 1000);
+        
+        console.log('Debug panel loaded');
+    </script>
+</body>
+</html>

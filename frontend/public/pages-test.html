@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pages Test - Bug Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .test-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .test-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        .test-card .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .test-card .title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .test-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .test-button:hover {
+            background: #5568d3;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #d0e8ff;
+        }
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 Bug Tracker - Pages Test</h1>
+        <p class="subtitle">Test all navigation pages to ensure they're working correctly</p>
+
+        <div class="test-grid">
+            <div class="test-card">
+                <div class="icon">🎫</div>
+                <div class="title">All Tickets</div>
+                <button class="test-button" onclick="testPage('/tickets')">Test Page</button>
+            </div>
+
+            <div class="test-card">
+                <div class="icon">📋</div>
+                <div class="title">Kanban Board</div>
+                <button class="test-button" onclick="testPage('/kanban')">Test Page</button>
+            </div>
+
+            <div class="test-card">
+                <div class="icon">👤</div>
+                <div class="title">My Tasks</div>
+                <button class="test-button" onclick="testPage('/my-tasks')">Test Page</button>
+            </div>
+
+            <div class="test-card">
+                <div class="icon">⚙️</div>
+                <div class="title">Settings</div>
+                <button class="test-button" onclick="testPage('/settings')">Test Page</button>
+            </div>
+
+            <div class="test-card">
+                <div class="icon">🏠</div>
+                <div class="title">Dashboard</div>
+                <button class="test-button" onclick="testPage('/')">Test Page</button>
+            </div>
+        </div>
+
+        <div class="status">
+            <h3 style="margin-top: 0;">Server Status</h3>
+            <div class="status-item">
+                <span>Frontend Server:</span>
+                <span class="badge badge-success">Running on :3011</span>
+            </div>
+            <div class="status-item">
+                <span>Backend Server:</span>
+                <span class="badge badge-success">Running on :5000</span>
+            </div>
+            <div class="status-item">
+                <span>Test User:</span>
+                <span>test@example.com / password123</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <button class="test-button" onclick="window.location.href='/'" style="padding: 12px 30px; font-size: 16px;">
+                🚀 Go to Main App
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function testPage(path) {
+            console.log('Testing page:', path);
+            window.location.href = path;
+        }
+
+        // Check if user is logged in
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                const loginWarning = document.createElement('div');
+                loginWarning.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #fff3cd;
+                    border: 1px solid #ffc107;
+                    color: #856404;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 1000;
+                `;
+                loginWarning.innerHTML = `
+                    <strong>⚠️ Not Logged In</strong><br>
+                    <small>You need to login first to access these pages</small><br>
+                    <button onclick="window.location.href='/login'" style="margin-top: 10px; padding: 6px 12px; background: #ffc107; border: none; border-radius: 4px; cursor: pointer;">
+                        Login Now
+                    </button>
+                `;
+                document.body.appendChild(loginWarning);
+            }
+        });
+    </script>
+</body>
+</html>
