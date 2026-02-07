@@ -1,0 +1,22 @@
+# Logs
+logs
+*.logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lern-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+_vscode
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*sln
+*.sw?

@@ -154,15 +154,57 @@ router.post('/:id/invite', async (req, res) => {
     if (project.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Only owner can invite' });
     }
-    const { userId } = req.body;
-    if (!userId) return res.status(400).json({ message: 'userId required' });
-    const alreadyMember = project.members.some((m) => String(m) === String(userId));
+    
+    const { userId, email } = req.body;
+    let userToInvite;
+    
+    // Support both userId and email
+    if (email) {
+      const User = (await import('../models/User.js')).default;
+      userToInvite = await User.findOne({ email: email.toLowerCase() });
+      if (!userToInvite) {
+        return res.status(404).json({ message: 'User with this email not found' });
+      }
+    } else if (userId) {
+      userToInvite = { _id: userId };
+    } else {
+      return res.status(400).json({ message: 'userId or email required' });
+    }
+    
+    const alreadyMember = project.members.some((m) => String(m) === String(userToInvite._id));
     if (alreadyMember) {
       return res.status(400).json({ message: 'User already in project' });
     }
-    project.members.push(userId);
+    
+    project.members.push(userToInvite._id);
     await project.save();
     await project.populate(['createdBy', 'members']);
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Update project
+router.put('/:id', async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    const project = await Project.findById(req.params.id);
+    
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+    
+    if (project.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Only owner can update project' });
+    }
+    
+    if (name) project.name = name;
+    if (description !== undefined) project.description = description;
+    
+    await project.save();
+    await project.populate(['createdBy', 'members']);
+    
     res.json(project);
   } catch (err) {
     res.status(500).json({ message: err.message });
